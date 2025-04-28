@@ -31,7 +31,7 @@ class TestTextNode(unittest.TestCase):
     def test_repr_with_url(self):   
         node = TextNode("This is a text node", TextType.LINK, "http://example.com")
         self.assertEqual(repr(node), "TextNode(This is a text node, Link, http://example.com)")
-
+    
 
 
 if __name__ == "__main__":
