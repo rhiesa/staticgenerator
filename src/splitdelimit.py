@@ -23,4 +23,10 @@ def split_nodes_delimited(old_nodes, delimiter, text_type):
             
             
 def extract_markdown_images(text):
-    
+    alt_text = re.findall(r"(?<=!\[).*?(?=\])", text)
+    url = re.findall(r"(?<=\]\().*?(?=\))", text)
+    extracted_tuples = list(zip(alt_text, url))
+    return extracted_tuples
+
+def extract_markdown_links(text):
+    pass

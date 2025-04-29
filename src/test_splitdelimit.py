@@ -74,6 +74,12 @@ class TestSplitNodesDelimited(unittest.TestCase):
         with self.assertRaises(Exception) as cm:
             split_nodes_delimited(old, "**", TextType.BOLD)
         self.assertIn("Missing closing delimiter", str(cm.exception))
-    
+        
+    def test_extract_images(self):
+        matches = extract_markdown_images(
+             "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
+        
     if __name__ == "__main__":
             unittest.main()
