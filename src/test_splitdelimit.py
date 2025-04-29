@@ -81,5 +81,55 @@ class TestSplitNodesDelimited(unittest.TestCase):
         )
         self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
         
+class TestExtractMarkdownImages(unittest.TestCase):
+    def test_no_images(self):
+        self.assertEqual(extract_markdown_images("no images here"), [])
+
+    def test_single_image(self):
+        text = "Here is an image ![alt text](http://example.com/img.png)"
+        self.assertEqual(
+            extract_markdown_images(text),
+            [("alt text", "http://example.com/img.png")]
+        )
+
+    def test_multiple_images(self):
+        text = "![first](http://a.com/a.png) some text ![second](https://b.org/b.jpg)"
+        expected = [
+            ("first",  "http://a.com/a.png"),
+            ("second", "https://b.org/b.jpg")
+        ]
+        self.assertEqual(extract_markdown_images(text), expected)
+
+    def test_parentheses_in_alt_and_url(self):
+        text = "![Alt (with parens)](http://example.com/img_(1).png)"
+        expected = [("Alt (with parens)", "http://example.com/img_(1).png")]
+        self.assertEqual(extract_markdown_images(text), expected)
+
+class TestExtractMarkdownLinks(unittest.TestCase):
+    def test_no_links(self):
+        self.assertEqual(extract_markdown_links("no links here"), [])
+
+    def test_single_link(self):
+        text = "Visit [Google](https://google.com) for more."
+        self.assertEqual(
+            extract_markdown_links(text),
+            [("Google", "https://google.com")]
+        )
+
+    def test_multiple_links(self):
+        text = "Links: [one](http://one) and [two](http://two)."
+        expected = [("one", "http://one"), ("two", "http://two")]
+        self.assertEqual(extract_markdown_links(text), expected)
+
+class TestCombined(unittest.TestCase):
+    def test_images_and_links_together(self):
+        text = "![img](http://img) and [lnk](http://lnk)"
+        # images only
+        self.assertEqual(extract_markdown_images(text), [("img", "http://img")])
+        # links picks up both bracketed items
+        self.assertEqual(
+            extract_markdown_links(text),
+            [("img", "http://img"), ("lnk", "http://lnk")]
+        )
     if __name__ == "__main__":
             unittest.main()
