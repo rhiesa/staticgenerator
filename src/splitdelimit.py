@@ -106,4 +106,12 @@ def text_to_textnodes(text):
     image_nodes = split_nodes_image(italic_nodes)
     link_nodes = split_nodes_link(image_nodes)
     return link_nodes
-    
+
+def markdown_to_blocks(markdown):
+    split_markdown = markdown.split("\n\n")
+    final_markdown= []
+    for text in split_markdown:
+        stripped_text = text.strip()
+        if stripped_text != "":
+            final_markdown.append(stripped_text)
+    return final_markdown
