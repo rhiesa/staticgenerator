@@ -219,5 +219,44 @@ class TestSplitNodesLink(unittest.TestCase):
         ]
         self.assertEqual([node_to_tuple(n) for n in out], expected)
         
+class TestSplitTexttoTextNodes(unittest.TestCase):
+    def assertNodeListsEqual(self, got, expected):
+        self.assertEqual(
+            len(got), len(expected),
+            f"List lengths differ: got {len(got)}, expected {len(expected)}"
+        )
+        for idx, (g, e) in enumerate(zip(got, expected)):
+            self.assertIsInstance(
+                g, TextNode,
+                f"Element {idx} is not a TextNode (got {type(g)})"
+            )
+            self.assertEqual(
+                g.text, e.text,
+                f"Text mismatch at idx {idx}: got {g.text!r}, expected {e.text!r}"
+            )
+            self.assertEqual(
+                g.text_type, e.text_type,
+                f"TextType mismatch at idx {idx}: got {g.text_type}, expected {e.text_type}"
+            )
+            
+    def test_combined_split(self):
+        text = "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        got = text_to_textnodes(text)
+        expected = [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("text", TextType.BOLD),
+            TextNode(" with an ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" word and a ", TextType.TEXT),
+            TextNode("code block", TextType.CODE),
+            TextNode(" and an ", TextType.TEXT),
+            TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(" and a ", TextType.TEXT),
+            TextNode("link", TextType.LINK, "https://boot.dev"),
+
+        ]
+        print (got)
+        self.assertNodeListsEqual(got, expected)
+        
     if __name__ == "__main__":
             unittest.main()
