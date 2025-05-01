@@ -131,5 +131,93 @@ class TestCombined(unittest.TestCase):
             extract_markdown_links(text),
             [("img", "http://img"), ("lnk", "http://lnk")]
         )
+class TestExtractors(unittest.TestCase):
+    def test_extract_images(self):
+        self.assertEqual(
+            extract_markdown_images("A![one](u1)B![two](u2)C"),
+            [("one","u1"),("two","u2")]
+        )
+
+    def test_extract_links(self):
+        self.assertEqual(
+            extract_markdown_links("go [here](url) and [there](url2)"),
+            [("here","url"),("there","url2")]
+        )
+
+class DummyNode:
+    def __init__(self, text, text_type=TextType.TEXT, url=None):
+        self.text = text
+        self.text_type = text_type
+        self.url = url
+
+def node_to_tuple(n):
+    return (n.text, n.text_type, getattr(n, "url", None))
+
+def test_extract_markdown_images_multiple(self):
+    self.assertEqual(
+        extract_markdown_images("A![one](u1)B![two](u2)C"),
+        [("one", "u1"), ("two", "u2")]
+    )
+
+class TestSplitNodesImage(unittest.TestCase):
+    def test_single_image(self):
+        nodes = [DummyNode("hello ![alt](http://x) world")]
+        out = split_nodes_image(nodes)
+        expected = [
+            ("hello ", TextType.TEXT, None),
+            ("alt",    TextType.IMAGE, "http://x"),
+            (" world", TextType.TEXT, None),
+        ]
+        self.assertEqual([node_to_tuple(n) for n in out], expected)
+
+    def test_multiple_images(self):
+        nodes = [DummyNode("A![one](u1)B![two](u2)C")]
+        out = split_nodes_image(nodes)
+        expected = [
+            ("A",   TextType.TEXT,  None),
+            ("one", TextType.IMAGE, "u1"),
+            ("B",   TextType.TEXT,  None),
+            ("two", TextType.IMAGE, "u2"),
+            ("C",   TextType.TEXT,  None),
+        ]
+        self.assertEqual([node_to_tuple(n) for n in out], expected)
+        
+    def test_parentheses_in_url_and_alt(self):
+        txt = "![Look (here)](http://foo.com/x_(1).png)"
+
+        out = split_nodes_image([DummyNode(txt)])
+        expected = [
+            ("Look (here)",    TextType.IMAGE, "http://foo.com/x_(1).png"),
+        ]
+        self.assertEqual([node_to_tuple(n) for n in out], expected)
+
+class TestSplitNodesLink(unittest.TestCase):
+    def test_plain_text_passes_through(self):
+        nodes = [DummyNode("no links!"), DummyNode("")]
+        out = split_nodes_link(nodes)
+        self.assertEqual([node_to_tuple(n) for n in out],
+                         [("no links!", TextType.TEXT, None)])
+
+    def test_single_link_splitting(self):
+        nodes = [DummyNode("go to [site](https://ex) now")]
+        out = split_nodes_link(nodes)
+        expected = [
+            ("go to ",   TextType.TEXT,  None),
+            ("site",     TextType.LINK,  "https://ex"),
+            (" now",     TextType.TEXT,  None),
+        ]
+        self.assertEqual([node_to_tuple(n) for n in out], expected)
+
+    def test_multiple_links(self):
+        txt = "[A](uA) then [B](uB) end"
+        out = split_nodes_link([DummyNode(txt)])
+        expected = [
+            ("A",   TextType.LINK,  "uA"),
+            (" then ", TextType.TEXT, None),
+            ("B",   TextType.LINK,  "uB"),
+            (" end", TextType.TEXT, None),
+        ]
+        self.assertEqual([node_to_tuple(n) for n in out], expected)
+        
     if __name__ == "__main__":
             unittest.main()
