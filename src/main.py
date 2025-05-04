@@ -1,6 +1,25 @@
+import os
+import shutil
 from textnode import *
 
+def copy_tree(src,dst):
+    os.makedirs(dst, exist_ok=True)
+    for entry in os.listdir(src):
+        src_path = os.path.join(src,entry)
+        dst_path = os.path.join(dst,entry)
+        
+        if os.path.isdir(src_path):
+            copy_tree(src_path,dst_path)
+        else:
+            shutil.copy2(src_path,dst_path)
+    pass
+
+
 def main():
-    
-    print (TextNode("This is some anchor text", TextType.LINK))
+    print ("cwd is:", os.getcwd())
+    ##step 1. erase public if it exists and make a new one
+    if os.path.exists('./public'):
+        shutil.rmtree('./public')
+    ##step 2. copy all files from static to public
+    copy_tree('./static','./public')
 main ()
