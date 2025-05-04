@@ -98,6 +98,7 @@ def split_nodes_link(old_nodes):
                 new_nodes.append(TextNode(remainder, TextType.TEXT))
     return new_nodes
 
+## this takes a text entry and breaks the string into a list of TextNode objects
 def text_to_textnodes(text):
     new_node = TextNode(text, TextType.TEXT)
     code_nodes = split_nodes_delimited([new_node],"`",TextType.CODE)
@@ -107,11 +108,42 @@ def text_to_textnodes(text):
     link_nodes = split_nodes_link(image_nodes)
     return link_nodes
 
+##this takes a text string and converts it into a list of blocks
 def markdown_to_blocks(markdown):
-    split_markdown = markdown.split("\n\n")
-    final_markdown= []
-    for text in split_markdown:
-        stripped_text = text.strip()
-        if stripped_text != "":
-            final_markdown.append(stripped_text)
-    return final_markdown
+    lines = markdown.splitlines()
+    blocks = []
+    current_block = []
+    inside_code_block = False
+
+    for line in lines:
+        if line.strip().startswith("```"):  # Detect start or end of a code block
+            if inside_code_block:
+                # End of a code block
+                current_block.append(line)  # Include the closing backticks
+                blocks.append("\n".join(current_block))  # Preserve all newlines
+                current_block = []
+                inside_code_block = False
+            else:
+                # Start of a code block
+                if current_block:
+                    blocks.append(" ".join(current_block).strip())  # Add previous block
+                    current_block = []
+                current_block.append(line)  # Include the opening backticks
+                inside_code_block = True
+        elif inside_code_block:
+            # Inside a code block, preserve newlines
+            current_block.append(line)
+        elif line.strip() == "":
+            # Empty line indicates a new block
+            if current_block:
+                blocks.append(" ".join(current_block).strip())
+                current_block = []
+        else:
+            # Normal line, add to the current block
+            current_block.append(line)
+
+    # Add the last block if any
+    if current_block:
+        blocks.append(" ".join(current_block).strip())
+
+    return blocks

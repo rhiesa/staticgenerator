@@ -13,7 +13,7 @@ class HTMLNode:
     def props_to_html(self):
         if self.props is None:
             return ""
-        return " ".join(f'{key}={value}' for key, value in self.props.items())
+        return " ".join(f'{key}="{value}"' for key, value in self.props.items())
         
     def __repr__(self):
         return f"HTMLNode(tag={self.tag}, value={self.value}, children={self.children}, props={self.props})"
@@ -27,6 +27,9 @@ class LeafNode(HTMLNode):
             raise ValueError("LeafNode value cannot be None")
         if self.tag == None:
             return self.value
+        if self.tag == "img":
+            props = self.props_to_html()
+            return f"<{self.tag} {props} />"
         if self.props:
             return f"<{self.tag} {self.props_to_html()}>{self.value}</{self.tag}>"
         return f"<{self.tag}>{self.value}</{self.tag}>"
@@ -56,7 +59,7 @@ def text_node_to_html(node):
     elif node.text_type == TextType.CODE:
         return LeafNode(tag = "code", value = node.text)
     elif node.text_type == TextType.LINK:
-        return LeafNode(tag = "a", value = node.text, prop = {"href": node.url})
+        return LeafNode(tag = "a", value = node.text, props = {"href": node.url})
     elif node.text_type == TextType.IMAGE:
         return LeafNode(tag = "img", value = "", props={"src": node.url, "alt": node.text})
     else:
