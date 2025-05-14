@@ -26,6 +26,6 @@ def main():
     ##step 2. copy all files from static to public
     copy_tree('./static','./public')
     #generate_page('content/index.md', 'template.html', 'public/index.html' )
-    generate_pages_recursive('./content', 'template.html', './public', basepath)
+    generate_pages_recursive('./content', 'template.html', './docs', basepath)
 
 main ()
