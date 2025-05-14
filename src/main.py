@@ -21,10 +21,10 @@ def main():
     basepath = sys.argv[1] if len(sys.argv) > 1 else "/"
     print ("cwd is:", os.getcwd())
     ##step 1. erase public if it exists and make a new one
-    if os.path.exists('./public'):
-        shutil.rmtree('./public')
+    if os.path.exists('./docs'):
+        shutil.rmtree('./docs')
     ##step 2. copy all files from static to public
-    copy_tree('./static','./public')
+    copy_tree('./static','./docs')
     #generate_page('content/index.md', 'template.html', 'public/index.html' )
     generate_pages_recursive('./content', 'template.html', './docs', basepath)
 
