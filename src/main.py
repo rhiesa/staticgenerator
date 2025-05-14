@@ -1,6 +1,7 @@
 import os
 import shutil
 from textnode import *
+from markdown_blocks import *
 
 def copy_tree(src,dst):
     os.makedirs(dst, exist_ok=True)
@@ -12,7 +13,7 @@ def copy_tree(src,dst):
             copy_tree(src_path,dst_path)
         else:
             shutil.copy2(src_path,dst_path)
-    pass
+
 
 
 def main():
@@ -22,4 +23,7 @@ def main():
         shutil.rmtree('./public')
     ##step 2. copy all files from static to public
     copy_tree('./static','./public')
+    #generate_page('content/index.md', 'template.html', 'public/index.html' )
+    generate_pages_recursive('./content', 'template.html', './public')
+
 main ()

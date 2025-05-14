@@ -1,5 +1,5 @@
 from enum import Enum
-
+import os
 from htmlnode import ParentNode
 from inline_markdown import text_to_textnodes
 from textnode import text_node_to_html_node, TextNode, TextType
@@ -148,3 +148,39 @@ def quote_to_html_node(block):
     content = " ".join(new_lines)
     children = text_to_children(content)
     return ParentNode("blockquote", children)
+
+def extract_title(markdown):
+    blocks = markdown_to_blocks(markdown)
+    for block in blocks:
+        if block.startswith("# "):
+            return block[2:].strip()
+    raise Exception ("no header")
+
+def generate_page(from_path, template_path, dest_path):
+    print (f"Generating page from {from_path} to {dest_path} using {template_path}")
+    with open(from_path) as f:
+        from_data = f.read()
+    with open(template_path) as t:
+        template_data = t.read()
+    markdown_htmlnode = markdown_to_html_node(from_data)
+    content_html = markdown_htmlnode.to_html()
+    title = extract_title(from_data)
+    page = template_data.replace("{{ Title }}", title)
+    page = page.replace("{{ Content }}", content_html)
+    dest_dir = os.path.dirname(dest_path)
+    if dest_dir and not os.path.isdir(dest_dir):
+        os.makedirs(dest_dir, exist_ok=True)
+    with open(dest_path, 'w') as d:
+        d.write(page)
+    
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    for root, dirs, files in os.walk(dir_path_content):
+        for file in files:
+            if file.endswith(".md"):
+                from_path = os.path.join(root, file)
+                
+                # Compute the relative path to preserve folder structure
+                relative_path = os.path.relpath(from_path, dir_path_content)
+                dest_path = os.path.join(dest_dir_path, os.path.splitext(relative_path)[0] + ".html")
+                
+                generate_page(from_path, template_path, dest_path)
