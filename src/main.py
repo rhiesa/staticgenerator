@@ -1,3 +1,4 @@
+import sys
 import os
 import shutil
 from textnode import *
@@ -17,6 +18,7 @@ def copy_tree(src,dst):
 
 
 def main():
+    basepath = sys.argv[1] if len(sys.argv) > 1 else "/"
     print ("cwd is:", os.getcwd())
     ##step 1. erase public if it exists and make a new one
     if os.path.exists('./public'):
@@ -24,6 +26,6 @@ def main():
     ##step 2. copy all files from static to public
     copy_tree('./static','./public')
     #generate_page('content/index.md', 'template.html', 'public/index.html' )
-    generate_pages_recursive('./content', 'template.html', './public')
+    generate_pages_recursive('./content', 'template.html', './public', basepath)
 
 main ()

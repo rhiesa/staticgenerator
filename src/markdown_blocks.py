@@ -156,7 +156,7 @@ def extract_title(markdown):
             return block[2:].strip()
     raise Exception ("no header")
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     print (f"Generating page from {from_path} to {dest_path} using {template_path}")
     with open(from_path) as f:
         from_data = f.read()
@@ -167,13 +167,15 @@ def generate_page(from_path, template_path, dest_path):
     title = extract_title(from_data)
     page = template_data.replace("{{ Title }}", title)
     page = page.replace("{{ Content }}", content_html)
+    page = page.replace('href="/', f'href="{basepath}')
+    page = page.replace('src="/', f'src="{basepath}')
     dest_dir = os.path.dirname(dest_path)
     if dest_dir and not os.path.isdir(dest_dir):
         os.makedirs(dest_dir, exist_ok=True)
     with open(dest_path, 'w') as d:
         d.write(page)
     
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     for root, dirs, files in os.walk(dir_path_content):
         for file in files:
             if file.endswith(".md"):
